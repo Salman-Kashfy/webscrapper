@@ -1,24 +1,26 @@
 const express = require('express');
-const route = express.Router();
-const {parse} = require('node-html-parser');
-const axios = require('axios');
+const app = express();
+const bodyParser = require("body-parser");
 
-const api = axios.create({
-    baseURL: 'https://www.amazon.com',
-    timeout: 10000,
+/**
+* Initialize Body parser
+* */
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+/**
+* Register your application routes here
+* */
+const api = require('./routes/api')
+app.use('/api', api)
+
+/*
+* 404 Route
+* */
+app.use((req, res) => {
+    const error = new Error("Not found");
+    error.status = 404;
+    res.status(404).json({status:false,message:'Oops. Page not found!'})
 });
 
-route.get('/',async (req, res, next) => {
-    res.set('Content-type','text/html')
-    api.get('/').then((result) => {
-        // console.log(result.data)
-        res.write(result.data);
-        res.end();
-    })
-    // res.status(200).json({
-    //     message: 'Orders were fetched !'
-    // });
-    return
-});
-
-module.exports = route
+module.exports = app
